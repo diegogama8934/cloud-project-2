@@ -10,7 +10,7 @@ import {
   AWS_BUCKET_PUBLIC_KEY,
   AWS_BUCKET_PRIVATE_KEY,
 } from "./config.js";
-import fs from "fs";
+import fs, { readFile } from "fs";
 
 const bucket = new S3Client({
   region: AWS_BUCKET_REGION,
@@ -20,13 +20,18 @@ const bucket = new S3Client({
   },
 });
 
-export async function uploadFile({ tempFilePath, name }) {
-  const stream = fs.createReadStream(tempFilePath);
+export async function uploadFile({ path, originalname }) {
+  console.log(path, originalname);
+  // yo.png
+  // console.log(originalname.split(".")[1]);
+
+  const stream = fs.createReadStream(path);
   const uploadParams = {
     Bucket: AWS_BUCKET_NAME,
-    Key: name,
+    Key: originalname,
     Body: stream,
   };
+
   const command = new PutObjectCommand(uploadParams);
   return await bucket.send(command);
 }
