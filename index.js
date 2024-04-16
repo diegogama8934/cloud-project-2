@@ -34,7 +34,7 @@ app.post("/images", upload.single("image"), async (req, res) => {
     const imageData = fs.readFileSync(req.file.path);
 
     // Guarda la imagen original
-    fs.writeFileSync('imagen_original.jpg', imageData);
+    fs.writeFileSync("imagen_original.jpg", imageData);
 
     // Define la clave de encriptación
     const key = "0123456789abcdef0123456789abcdef";
@@ -42,11 +42,18 @@ app.post("/images", upload.single("image"), async (req, res) => {
     // Función para encriptar una imagen utilizando AES
     function encryptImage(imageData, key) {
       // Crea un objeto de cifrado con la clave proporcionada
-      const cipher = crypto.createCipheriv("aes-256-cbc", key, Buffer.alloc(16, 0));
-      
+      const cipher = crypto.createCipheriv(
+        "aes-256-cbc",
+        key,
+        Buffer.alloc(16, 0)
+      );
+
       // Actualiza el cifrado con los datos de la imagen y finaliza
-      const encryptedImage = Buffer.concat([cipher.update(imageData), cipher.final()]);
-      
+      const encryptedImage = Buffer.concat([
+        cipher.update(imageData),
+        cipher.final(),
+      ]);
+
       // Devuelve la imagen encriptada
       return encryptedImage;
     }
@@ -57,10 +64,10 @@ app.post("/images", upload.single("image"), async (req, res) => {
     // Función para guardar la imagen encriptada en un archivo
     function saveImageToFile(imageData, fileName) {
       try {
-          fs.writeFileSync(fileName, imageData);
-          console.log("Imagen encriptada guardada como:", fileName);
+        fs.writeFileSync(fileName, imageData);
+        console.log("Imagen encriptada guardada como:", fileName);
       } catch (error) {
-          console.error("Error al guardar la imagen encriptada:", error);
+        console.error("Error al guardar la imagen encriptada:", error);
       }
     }
 
@@ -68,13 +75,22 @@ app.post("/images", upload.single("image"), async (req, res) => {
     saveImageToFile(encryptedImage, "imagen_encriptada.jpg");
 
     // Convertir la imagen encriptada a una cadena de texto base64
-    const encryptedImageString = encryptedImage.toString('base64');
+    const encryptedImageString = encryptedImage.toString("base64");
 
     // Enviar la imagen encriptada como cadena de texto al cliente
     res.send(encryptedImageString);
   } catch (error) {
     console.error(error);
-    res.status(500).send('Error al procesar la imagen');
+    res.status(500).send("Error al procesar la imagen");
+  }
+});
+
+app.post("/example", (req, res) => {
+  try {
+    res.send("Hola");
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error en la peticion");
   }
 });
 
