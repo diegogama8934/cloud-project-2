@@ -5,7 +5,6 @@ import cors from "cors";
 import fs from "fs";
 import crypto from "crypto";
 
-
 const app = express();
 const port = 5910;
 const upload = multer({ dest: "./uploads" });
@@ -26,7 +25,6 @@ app.get("/images/:filename", async (req, res) => {
   res.send(result);
 });
 
-
 app.post("/images", upload.single("image"), async (req, res) => {
   console.log(req.file);
   const result = await uploadFile(req.file);
@@ -38,12 +36,8 @@ app.post("/images", upload.single("image"), async (req, res) => {
     // Guarda la imagen original
     fs.writeFileSync('imagen_original.jpg', imageData);
 
-    // Lee la clave desde el archivo
-    const keyFilePath = "clave.txt";
-    const key = fs.readFileSync(keyFilePath, "utf8").trim(); // Lee el contenido del archivo y elimina cualquier espacio en blanco
-
-    // Convertir la clave hexadecimal en un búfer
-    const keyBuffer = Buffer.from(key, "hex");
+    // Define la clave de encriptación
+    const key = "0123456789abcdef0123456789abcdef";
 
     // Función para encriptar una imagen utilizando AES
     function encryptImage(imageData, key) {
@@ -58,8 +52,9 @@ app.post("/images", upload.single("image"), async (req, res) => {
     }
 
     // Encriptar la imagen
-    const encryptedImage = encryptImage(imageData, keyBuffer);
+    const encryptedImage = encryptImage(imageData, key);
 
+    // Función para guardar la imagen encriptada en un archivo
     function saveImageToFile(imageData, fileName) {
       try {
           fs.writeFileSync(fileName, imageData);
@@ -67,51 +62,21 @@ app.post("/images", upload.single("image"), async (req, res) => {
       } catch (error) {
           console.error("Error al guardar la imagen encriptada:", error);
       }
-  }
+    }
 
     // Guardar la imagen encriptada
     saveImageToFile(encryptedImage, "imagen_encriptada.jpg");
 
-    // Subir la imagen encriptada al bucket de AWS S3
-    const uploadResult = await uploadFile({
-      path: "imagen_encriptada.jpg",
-      originalname: "imagen_encriptada.jpg"
-    });
+    // Convertir la imagen encriptada a una cadena de texto base64
+    const encryptedImageString = encryptedImage.toString('base64');
 
-    console.log("Imagen encriptada subida a S3:", uploadResult);
-
-    // // Función para desencriptar una imagen utilizando AES
-    // function decryptImage(encryptedImage, key) {
-    //   try {
-    //       // Crea un objeto de descifrado con la clave proporcionada
-    //       const decipher = crypto.createDecipheriv("aes-256-cbc", key, Buffer.alloc(16, 0));
-          
-    //       // Actualiza el descifrado con los datos de la imagen encriptada y finaliza
-    //       const decryptedImage = Buffer.concat([decipher.update(encryptedImage), decipher.final()]);
-          
-    //       // Devuelve la imagen desencriptada
-    //       return decryptedImage;
-    //   } catch (error) {
-    //       console.error("Error al desencriptar la imagen:", error);
-    //       return null;
-    //   }
-    // }
-
-    // // Desencriptar la imagen
-    // const decryptedImage = decryptImage(encryptedImage, keyBuffer);
-
-    // // Guardar la imagen desencriptada
-    // saveImageToFile(decryptedImage, "imagen_desencriptada.jpg");
-
-    // Enviar respuesta al cliente
-    res.send(result);
+    // Enviar la imagen encriptada como cadena de texto al cliente
+    res.send(encryptedImageString);
   } catch (error) {
     console.error(error);
     res.status(500).send('Error al procesar la imagen');
   }
 });
-
-
 
 app.listen(port, () => {
   console.log("Server on port " + port);
