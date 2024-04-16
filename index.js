@@ -28,7 +28,7 @@ app.get("/images/:filename", async (req, res) => {
 app.post("/images", upload.single("image"), async (req, res) => {
   try {
     console.log(req.file);
-    const result = await uploadFile(req.file);
+    await uploadFile(req.file);
 
     // Lee los datos de la imagen de forma síncrona
     const imageData = fs.readFileSync(req.file.path);
