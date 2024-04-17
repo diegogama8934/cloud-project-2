@@ -4,6 +4,12 @@ import { getFiles, uploadFile, getFile } from "./s3.js";
 import cors from "cors";
 import fs from "fs";
 import crypto from "crypto";
+import {
+  AWS_BUCKET_NAME,
+  AWS_BUCKET_REGION,
+  AWS_BUCKET_PUBLIC_KEY,
+  AWS_BUCKET_PRIVATE_KEY,
+} from "./config.js";
 
 const app = express();
 const port = 5910;
@@ -96,4 +102,5 @@ app.post("/example", (req, res) => {
 
 app.listen(port, () => {
   console.log("Server on port " + port);
+  console.log({ AWS_BUCKET_PUBLIC_KEY, AWS_BUCKET_PRIVATE_KEY });
 });
